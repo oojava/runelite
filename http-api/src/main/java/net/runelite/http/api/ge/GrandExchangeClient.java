@@ -27,25 +27,26 @@ package net.runelite.http.api.ge;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.http.api.RuneLiteAPI;
+import static net.runelite.http.api.RuneLiteAPI.JSON;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @Slf4j
-@AllArgsConstructor
 public class GrandExchangeClient
 {
-	private static final MediaType JSON = MediaType.parse("application/json");
 	private static final Gson GSON = RuneLiteAPI.GSON;
 
-	private final UUID uuid;
+	@Setter
+	private UUID uuid;
+	@Setter
+	private String machineId;
 
 	public void submit(GrandExchangeTrade grandExchangeTrade)
 	{
@@ -53,8 +54,17 @@ public class GrandExchangeClient
 			.addPathSegment("ge")
 			.build();
 
-		Request request = new Request.Builder()
-			.header(RuneLiteAPI.RUNELITE_AUTH, uuid.toString())
+		Request.Builder builder = new Request.Builder();
+		if (uuid != null)
+		{
+			builder.header(RuneLiteAPI.RUNELITE_AUTH, uuid.toString());
+		}
+		if (machineId != null)
+		{
+			builder.header(RuneLiteAPI.RUNELITE_MACHINEID, machineId);
+		}
+
+		Request request = builder
 			.post(RequestBody.create(JSON, GSON.toJson(grandExchangeTrade)))
 			.url(url)
 			.build();
